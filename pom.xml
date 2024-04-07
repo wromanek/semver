@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>info.wromanek</groupId>
     <artifactId>semver</artifactId>
     <packaging>jar</packaging>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT.build-6</version>
     <name>semver</name>
     <url>http://maven.apache.org</url>
     <dependencies>
@@ -24,11 +25,69 @@
                     <projectVersionPolicyId>SemVerVersionPolicy</projectVersionPolicyId>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>add-build-number</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>buildnumber-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>create</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <doCheck>false</doCheck>
+                            <doUpdate>false</doUpdate>
+                            <format>{0,number}</format>
+                            <items>
+                                <item>buildNumber</item>
+                            </items>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>versions-maven-plugin</artifactId>
+                        <configuration>
+                            <newVersion>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}-SNAPSHOT.build-${buildNumber}</newVersion>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>update-version</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>set</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <scm>
         <developerConnection>scm:git:git@github.com:wromanek/semver.git</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 </project>
